@@ -2,14 +2,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-
-
+#include <time.h>
 
 int main(int argc , char *args[]){
 	if (argc!=6){
 		printf("Invalid number of arguments \n");
 		return -1;
 	}
+	clock_t begin = clock();
 	char *file_name = args[2];
 	const int N = atoi(args[1]);
 	const int n_steps = atoi(args[3]);
@@ -18,12 +18,12 @@ int main(int argc , char *args[]){
 	character to double, maybe a single cast would suffice */
 	const double delta_t = atof(args[4]);
 	printf("Delta --> %f \n" , delta_t);
-	FILE *file;
+	FILE *file; 
 
 	file = fopen(file_name , "rb");
-	/*maybe in this case we could allocate memory for this
+	/*maybe in this case we could allocate memory for this 
 	matrix statically*/
-	double **arr = (double **)malloc(N*sizeof(double*));
+	double **arr = (double **)malloc(N*sizeof(double*)); 
 	for (int i = 0 ; i<N ; i++){
 		arr[i] = (double*)malloc(6 * sizeof(double));
 	}
@@ -57,7 +57,7 @@ int main(int argc , char *args[]){
 	printf("G ::: -> %f" , G);
 	const float epsilon_0 = 0.001;
 
-	double **new_arr = (double **)malloc(N*sizeof(double*));
+	double **new_arr = (double **)malloc(N*sizeof(double*)); 
 	for (int i = 0 ; i<N ; i++){
 		new_arr[i] = (double*)malloc(4 * sizeof(double));
 	}
@@ -76,7 +76,7 @@ int main(int argc , char *args[]){
 				if (j != i){
 					/* first we calculate the coordinates with respect
 					to the initial frame of reference, then
-					the denominator and finally multiply the result
+					the denominator and finally multiply the result 
 					by the mass of the particle and the distance vector.
 					*/
 					double x_direction = arr[i][0] - arr[j][0];
@@ -138,8 +138,8 @@ int main(int argc , char *args[]){
 	file2 = fopen("output.gal" , "wb");
 	for (int i = 0 ; i<(N) ; i++){
 		double x , y , vx , vy , mass , bright;
-		x = arr[i][0];
-		y = arr[i][1];
+		x = arr[i][0] ;
+		y = arr[i][1] ;
 		mass = arr[i][2];
 		vx = arr[i][3];
 		vy = arr[i][4];
@@ -150,9 +150,11 @@ int main(int argc , char *args[]){
 		fwrite(&vx , sizeof(double) , 1 ,file2);
 		fwrite(&vy , sizeof(double) , 1 ,file2);
 		fwrite(&bright, sizeof(double) , 1 ,file2);
-	}
 
+	}
 	fclose(file2);
+
+
 	for (int i = 0; i<N ; i++){
 		free(arr[i]);
 	}
@@ -164,6 +166,14 @@ int main(int argc , char *args[]){
 	}
 
 	free(new_arr);
+
+	clock_t end = clock(); 
+	double time_spent = (double)(end - begin)/CLOCKS_PER_SEC;
+
+	FILE *file3; 
+	file3 = fopen("time.txt" , "a+");
+	fprintf(file3 , "%lf \n" , time_spent );
+	fclose(file3);
 
 	return 0;
 }
