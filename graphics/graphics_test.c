@@ -2,7 +2,7 @@
  * Example of how to use graphics routines.
  *
  * Based on code by Oliver Fringer, Stanford University.
- * 
+ *
  * Modified by Elias Rudberg, Uppsala University.
  *
  */
@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
   float xB = 0.32;
   float yB = 0.56;
 
-  InitializeGraphics(argv[0],windowWidth,windowWidth);
+  InitializeGraphics(argc[0],windowWidth,windowWidth);
   SetCAxes(0,1);
 
   printf("Hit q to quit.\n");
