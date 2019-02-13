@@ -13,11 +13,9 @@ int main(int argc , char *args[]){
 	char *file_name = args[2];
 	const int N = atoi(args[1]);
 	const int n_steps = atoi(args[3]);
-	printf("Number of steps --> %d \n" , n_steps);
 	/*not sure if this is the correct way of converting from
 	character to double, maybe a single cast would suffice */
 	const double delta_t = atof(args[4]);
-	printf("Delta --> %f \n" , delta_t);
 	FILE *file; 
 
 	file = fopen(file_name , "rb");
@@ -29,10 +27,14 @@ int main(int argc , char *args[]){
 	}
 
 	double **acc_matrix_x = (double**)malloc(N*sizeof(double*));
+
+	for (int i = 0 ; i<N ;i++){
+		acc_matrix_x[i] = (double*)malloc((i+1) * sizeof(double));
+	}
+
 	double **acc_matrix_y = (double**)malloc(N*sizeof(double*));
 	for (int i = 0 ; i<N ;i++){
-		acc_matrix_x[i] = (double*)malloc(i * sizeof(double));
-		acc_matrix_y[i] = (double*)malloc(i * sizeof(double));
+		acc_matrix_y[i] = (double*)malloc((i+1) * sizeof(double));
 	}
 
 	for (int i = 0 ; i<(N) ; i++){
@@ -60,7 +62,6 @@ int main(int argc , char *args[]){
 	}*/
 
 	const float G = 100/(double)N;
-	printf("G ::: -> %f" , G);
 	const float epsilon_0 = 0.001;
 
 	//do we need to save the position for each step?
@@ -79,27 +80,35 @@ int main(int argc , char *args[]){
 					double denominator = pow((sqrt((x_direction)*(x_direction) + (y_direction)*(y_direction))+epsilon_0),3);
 					acc_matrix_x[i][j] = -G*arr[j][2]*x_direction/denominator;
 					acc_matrix_y[i][j] = -G*arr[j][2]*y_direction/denominator;;
+					//printf("%lf \n" , acc_matrix_y[i][j]);
 			}
 
 		}
 
 		for (int i = 0 ; i < N ; i++){
 			double total_acc_x, total_acc_y;
-			for (int j = 0 ; j <= i ; j++){
-
+			int counter = 0;
+			for (int j = 0 ; j < i ; j++){
+				//printf("%lf \n" , acc_matrix_y[i][j]);
 				total_acc_x += acc_matrix_x[i][j];
 				total_acc_y += acc_matrix_y[i][j];
+				counter++;
+				//printf("First loop : %d\n" , j );
 			}
-			for (int j = i+1 ; j<N ; j++){
+			printf("First loop --> %lf \n",total_acc_y);
+			for (int j = i+1 ; j < N ; j++){
 				total_acc_x += (-acc_matrix_x[j][i]);
-				total_acc_y += (-acc_matrix_x[j][i]);
+				total_acc_y += (-acc_matrix_y[j][i]);
+				counter++;
+				//printf("Second loop : %d \n" , j);
 			}
-			arr[i][3] += delta_t*total_acc_x;
-			arr[i][4] += delta_t*total_acc_y;
-			arr[i][0] += delta_t*arr[i][3];
-			arr[i][1] += delta_t*arr[i][4];
+			printf("Second loop --> %lf \n",total_acc_y);
+			//printf("N ::::___>>> %d \n" , N);
+			arr[i][3] = arr[i][3] + delta_t*total_acc_x;
+			arr[i][4] = arr[i][4] + delta_t*total_acc_y;
+			arr[i][0] = arr[i][0] + delta_t*arr[i][3];
+			arr[i][1] = arr[i][1] + delta_t*arr[i][4];
 		}
-
 
 	}
 
@@ -123,23 +132,18 @@ int main(int argc , char *args[]){
 
 	}
 
-
 	fclose(file2);
 	
 
-	printf("Here \n");
 
 	for (int i = 0; i<N ; i++){
 		free(arr[i]);
-	}
-
-	free(arr);
-	printf("Fails here -:: \n");
-	for (int i = 0 ; i<N ; i++){
 		free(acc_matrix_x[i]);
 		free(acc_matrix_y[i]);
 
 	}
+
+	free(arr);
 	free(acc_matrix_x);
 	free(acc_matrix_y);
 				
