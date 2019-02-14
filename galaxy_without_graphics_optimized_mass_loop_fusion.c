@@ -79,20 +79,7 @@ int main(int argc , char *args[]){
 			}
 
 		}
-		for (int i = 0 ; i< N ; i++){
-			for (int j = 0 ; j<= i ; j++){
-				printf("%lf ",acc_matrix_x[i][j]);
-			}
-		}
-			printf("\n");
-		/*
-		- * * * *
-		2 - * * *
-		3 4 - * *
-		6 7 8 - *
-		8 3 1 4 -
 
-		*/
 		for (int i = 0 ; i < N ; i++){
 			double total_acc_x = 0;
 		  double total_acc_y = 0;
@@ -102,13 +89,11 @@ int main(int argc , char *args[]){
 				total_acc_y = total_acc_y + arr[j][2]*acc_matrix_y[i][j];
 				//printf("First loop : %d\n" , j );
 			}
-			printf("First loop --> %lf \n",total_acc_y);
 			for (int j = i+1 ; j < N ; j++){
 				total_acc_x = total_acc_x-arr[j][2]*acc_matrix_x[j][i];
 				total_acc_y = total_acc_y-arr[j][2]*acc_matrix_y[j][i];
 				//printf("Second loop : %d \n" , j);
 			}
-			printf("Second loop --> %lf \n",total_acc_y);
 			//printf("N ::::___>>> %d \n" , N);
 			arr[i][3] = arr[i][3] + delta_t*total_acc_x;
 			arr[i][4] = arr[i][4] + delta_t*total_acc_y;
