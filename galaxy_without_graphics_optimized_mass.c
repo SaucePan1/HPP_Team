@@ -17,13 +17,13 @@ int main(int argc , char *args[]){
 	const int n_steps = atoi(args[3]);
 	/*not sure if this is the correct way of converting from
 	character to double, maybe a single cast would suffice */
-  const double delta_t = atof(args[4]);
+    const double delta_t = atof(args[4]);
 	FILE *file;
 
 	file = fopen(file_name , "rb");
 	/*maybe in this case we could allocate memory for this
 	matrix statically*/
-	double **arr = (double **)malloc(N*sizeof(double*));
+	double **  arr = (double **)malloc(N*sizeof(double*));
 	for (int i = 0 ; i<N ; i++){
 		arr[i] = (double*)malloc(6 * sizeof(double));
 	}

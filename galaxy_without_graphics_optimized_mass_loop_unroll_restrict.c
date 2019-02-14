@@ -23,9 +23,9 @@ int main(int argc , char *args[]){
 	file = fopen(file_name , "rb");
 	/*maybe in this case we could allocate memory for this
 	matrix statically*/
-	double **arr = (double **)malloc(N*sizeof(double*));
-	double **acc_matrix_x = (double**)malloc(N*sizeof(double*));
-	double **acc_matrix_y = (double**)malloc(N*sizeof(double*));
+	double ** __restrict arr = (double **)malloc(N*sizeof(double*));
+	double ** __restrict acc_matrix_x = (double**)malloc(N*sizeof(double*));
+	double ** __restrict acc_matrix_y = (double**)malloc(N*sizeof(double*));
 	for (int i = 0 ; i<N ;i++){
 		arr[i] = (double*)malloc(6 * sizeof(double));
 		acc_matrix_x[i] = (double*)malloc((i+1) * sizeof(double));
