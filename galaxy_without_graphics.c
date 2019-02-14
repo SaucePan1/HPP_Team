@@ -19,7 +19,7 @@ int main(int argc , char *args[]){
 	const double delta_t = atof(args[4]);
 	printf("Delta --> %f \n" , delta_t);
 
-	FILE *file; 
+	FILE *file;
 	file = fopen(file_name , "rb");
 	/*maybe in this case we could allocate memory for this
 	matrix statically*/
@@ -64,7 +64,7 @@ int main(int argc , char *args[]){
 
 	//do we need to save the position for each step?
 	for (int k = 0 ; k<n_steps ; k++){
-
+		printf("Step %d: \n",k );
 		for (int i = 0; i<N ; i++){
 			//calculates new positions in just one step
 			double sum_x = 0;
@@ -72,7 +72,8 @@ int main(int argc , char *args[]){
 			double force_x = 0;
 			double force_y = 0;
 			double acceleration_x,acceleration_y,new_velocity_x,new_velocity_y , new_position_x , new_position_y;
-			for (int j = 0; j<(N) ; j++){
+
+			for (int j = 0; j<N) ; j++){
 				if (j != i){
 					/* first we calculate the coordinates with respect
 					to the initial frame of reference, then
@@ -82,6 +83,9 @@ int main(int argc , char *args[]){
 					double x_direction = arr[i][0] - arr[j][0];
 					double y_direction = arr[i][1] - arr[j][1];
 					double denominator = pow((sqrt((x_direction)*(x_direction) + (y_direction)*(y_direction))+epsilon_0),3);
+
+					printf("Acceleration (%d, %d): %lf\n", i, j, -G*arr[j][2]*x_direction/denominator; );
+
 					sum_x += arr[j][2]*x_direction/denominator;
 					sum_y += arr[j][2]*y_direction/denominator;
 					//printf("Suma x ---> %lf \n" , sum_x );
@@ -98,18 +102,23 @@ int main(int argc , char *args[]){
 			*/
 			acceleration_x = force_x/arr[i][2];
 			acceleration_y = force_y/arr[i][2];
+
+			printf("Particle %d, total acc in x:  %lf \n", i, acceleration_x);
+			printf("Particle %d, total acc in y:  %lf \n", i, acceleration_y);
+
 			new_velocity_x = arr[i][3] + delta_t*acceleration_x;
 			new_velocity_y = arr[i][4] + delta_t*acceleration_y;
 			new_position_x = arr[i][0] + delta_t*new_velocity_x;
 			new_position_y = arr[i][1] + delta_t*new_velocity_y;
 
+			/*
 			printf("force x :%lf\n", force_x);
 			printf("force y :%lf\n", force_y);
 			printf("pos_x %lf \n", new_position_x);
 			printf("pos_y %lf \n", new_position_y);
 			printf("VEL_x %lf \n", new_velocity_x);
 			printf("VEL_y %lf \n", new_velocity_y);
-
+			*/
 
 			new_arr[i][0] = new_position_x;
 			new_arr[i][1] = new_position_y;
@@ -127,13 +136,6 @@ int main(int argc , char *args[]){
 
 	}
 
-		// check whether the file was read properly
-	for (int i = 0 ; i<N ; i++){
-		for (int j = 0; j<6 ; j++){
-			printf("Number %lf \n" , arr[i][j]);
-		}
-		printf("Second one \n");
-	}
 	FILE *file2;
 	file2 = fopen("output.gal" , "wb");
 	for (int i = 0 ; i<(N) ; i++){
