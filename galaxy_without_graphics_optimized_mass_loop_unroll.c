@@ -57,10 +57,10 @@ int main(int argc , char *args[]){
 
 	//do we need to save the position for each step?
 	for (int k = 0 ; k<n_steps ; k++){
-		int i = 0
+		int i, j;
 		for (i = 0; i<N ; i+=4){
 			//calculates new positions in just one step
-			for (int j = 0; j<=i ; j++){
+			for (j = 0; j<=i ; j++){
 					/* first we calculate the coordinates with respect
 					to the initial frame of reference, then
 					the denominator and finally multiply the result
@@ -74,7 +74,7 @@ int main(int argc , char *args[]){
 					double y_direction_2 = arr[i+1][1] - arr[j][1];
 					double y_direction_3 = arr[i+2][1] - arr[j][1];
 					double y_direction_4 = arr[i+3][1] - arr[j][1];
-					double denominator_1 = pow((sqrt((x_direction_1)*(x_direction_1) + (y_direction_2)*(y_direction_2))+epsilon_0),3);
+					double denominator_1 = pow((sqrt((x_direction_1)*(x_direction_1) + (y_direction_1)*(y_direction_1))+epsilon_0),3);
 					acc_matrix_x[i][j] = -G*x_direction_1/denominator_1;
 					acc_matrix_y[i][j] = -G*y_direction_1/denominator_1;
 					double denominator_2 = pow((sqrt((x_direction_2)*(x_direction_2) + (y_direction_2)*(y_direction_2))+epsilon_0),3);
@@ -91,7 +91,7 @@ int main(int argc , char *args[]){
 			for ( i = i ; i<N ; i++){
 				double x_direction_1 = arr[i][0] - arr[j][0];
 				double y_direction_1 = arr[i][1] - arr[j][1];
-				double denominator_1 = pow((sqrt((x_direction_1)*(x_direction_1) + (y_direction_2)*(y_direction_2))+epsilon_0),3);
+				double denominator_1 = pow((sqrt((x_direction_1)*(x_direction_1) + (y_direction_1)*(y_direction_1))+epsilon_0),3);
 				acc_matrix_x[i][j] = -G*x_direction_1/denominator_1;
 				acc_matrix_y[i][j] = -G*y_direction_1/denominator_1;
 			}

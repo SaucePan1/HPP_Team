@@ -13,11 +13,10 @@ int main(int argc , char *args[]){
 	char *file_name = args[2];
 	const int N = atoi(args[1]);
 	const int n_steps = atoi(args[3]);
-	printf("Number of steps --> %d \n" , n_steps);
 	/*not sure if this is the correct way of converting from
 	character to double, maybe a single cast would suffice */
 	const double delta_t = atof(args[4]);
-	printf("Delta --> %f \n" , delta_t);
+
 	FILE *file;
 
 	file = fopen(file_name , "rb");
@@ -54,7 +53,6 @@ int main(int argc , char *args[]){
 
 
 	const float G = 100/(double)N;
-	printf("G ::: -> %f" , G);
 	const float epsilon_0 = 0.001;
 
 	double **new_arr = (double **)malloc(N*sizeof(double*));
@@ -84,8 +82,7 @@ int main(int argc , char *args[]){
 					double denominator = pow((sqrt((x_direction)*(x_direction) + (y_direction)*(y_direction))+epsilon_0),3);
 					sum_x += arr[j][2]*x_direction/denominator;
 					sum_y += arr[j][2]*y_direction/denominator;
-					//printf("Suma x ---> %lf \n" , sum_x );
-					//printf("Suma y ---> %lf \n" , sum_y);
+
 				}
 
 			}
@@ -103,12 +100,6 @@ int main(int argc , char *args[]){
 			new_position_x = arr[i][0] + delta_t*new_velocity_x;
 			new_position_y = arr[i][1] + delta_t*new_velocity_y;
 
-			printf("force x :%lf\n", force_x);
-			printf("force y :%lf\n", force_y);
-			printf("pos_x %lf \n", new_position_x);
-			printf("pos_y %lf \n", new_position_y);
-			printf("VEL_x %lf \n", new_velocity_x);
-			printf("VEL_y %lf \n", new_velocity_y);
 
 
 			new_arr[i][0] = new_position_x;
@@ -130,9 +121,7 @@ int main(int argc , char *args[]){
 		// check whether the file was read properly
 	for (int i = 0 ; i<N ; i++){
 		for (int j = 0; j<6 ; j++){
-			printf("Number %lf \n" , arr[i][j]);
 		}
-		printf("Second one \n");
 	}
 	FILE *file2;
 	file2 = fopen("output.gal" , "wb");
