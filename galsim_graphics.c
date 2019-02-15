@@ -6,7 +6,7 @@
 #include "graphics.h"
 
 //graphics shit
-const float circleRadius=0.05, circleColor=0;
+const float circleRadius=0.01, circleColor=0;
 const int windowWidth=800;
 
 
@@ -22,11 +22,9 @@ int main(int argc , char *args[]){
 	const int n_steps = atoi(args[3]);
 	//graphic constants
 	int L=1,W=1;
-	printf("Number of steps --> %d \n" , n_steps);
 	/*not sure if this is the correct way of converting from
 	character to double, maybe a single cast would suffice */
 	const double delta_t = atof(args[4]);
-	printf("Delta --> %f \n" , delta_t);
 
 	FILE *file;
 	file = fopen(file_name , "rb");
@@ -63,7 +61,6 @@ int main(int argc , char *args[]){
 
 
 	const float G = 100/(double)N;
-	printf("G ::: -> %f" , G);
 	const float epsilon_0 = 0.001;
 
 	double **new_arr = (double **)malloc(N*sizeof(double*));
@@ -125,13 +122,6 @@ int main(int argc , char *args[]){
 				new_position_x = arr[i][0] + delta_t*new_velocity_x;
 				new_position_y = arr[i][1] + delta_t*new_velocity_y;
 
-				printf("force x :%lf\n", force_x);
-				printf("force y :%lf\n", force_y);
-				printf("pos_x %lf \n", new_position_x);
-				printf("pos_y %lf \n", new_position_y);
-				printf("VEL_x %lf \n", new_velocity_x);
-				printf("VEL_y %lf \n", new_velocity_y);
-
 				new_arr[i][0] = new_position_x;
 				new_arr[i][1] = new_position_y;
 				new_arr[i][2] = new_velocity_x;
@@ -151,7 +141,7 @@ int main(int argc , char *args[]){
 			}
 			Refresh();
 			/* Sleep a short while to avoid screen flickering. */
-			usleep(10000);
+			usleep(8000);
 		}
 		//out of step loop
 		//set arr to initial values so simulation can loop

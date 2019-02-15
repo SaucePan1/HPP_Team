@@ -1,2 +1,11 @@
-test
-test_pointers.c
+# Ignore all
+*
+
+# Unignore all with c extensions
+!*.c
+
+#Unignore makefile
+!makefile
+
+# Unignore all dirs
+!*/
