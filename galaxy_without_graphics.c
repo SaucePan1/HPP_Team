@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-
+#include <time.h>
 
 
 int main(int argc , char *args[]){
@@ -10,6 +10,7 @@ int main(int argc , char *args[]){
 		printf("Invalid number of arguments \n");
 		return -1;
 	}
+	clock_t begin = clock();
 	char *file_name = args[2];
 	const int N = atoi(args[1]);
 	const int n_steps = atoi(args[3]);
@@ -154,5 +155,12 @@ int main(int argc , char *args[]){
 
 	free(new_arr);
 
+	clock_t end = clock();
+	double time_spent = (double)(end - begin)/CLOCKS_PER_SEC;
+
+	FILE *file3;
+	file3 = fopen("time.txt" , "a+");
+	fprintf(file3 , "%lf \n" , time_spent );
+	fclose(file3);
 	return 0;
 }
