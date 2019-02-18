@@ -1,5 +1,8 @@
 CFLAGS=-Wall
 LDFLAGS= -lm
+# Xlib flags needed for mac
+#-lX11 -L/usr/X11/lib -I/usr/X11/include
+
 
 galaxy_without_graphics: galaxy_without_graphics.o
 	gcc -o galaxy_wo_graphics galaxy_without_graphics.o $(LDFLAGS)

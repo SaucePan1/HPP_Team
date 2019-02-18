@@ -1,121 +1,259 @@
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include <time.h>
+#include "graphics.h"
 
-//output should be a a binary file
-float eps= 0.001;
+const float circleRadius=0.01, circleColor=0;
+const int windowWidth=800;
 
+#define MASS 2
 
-void update_particle(int N, double** pos, double** vel, double* mass,
-  int i , double delta_t, double G);
-void get_a(int i, double* m, double** pos, double ** a, double G, int N);
+int main(int argc , char *args[]){
+	if (argc!=6){
+		printf("Invalid number of arguments \n");
+		return -1;
+	}
+	clock_t begin = clock();
+	const char *file_name = args[2];
+	const int N = atoi(args[1]);
+	const int n_steps = atoi(args[3]);
+	/*not sure if this is the correct way of converting from
+	character to double, maybe a single cast would suffice */
+  const double delta_t = atof(args[4]);
+	const int graphics =atoi(args[5]);
 
-int main(int argc, char const *argv[]) {
-  int N, nsteps, graphics, i, step;
-  double delta_t, G;
-  const char * filename =argv[2];
-  if(argc !=5){
-    printf("Invalid number of arguments.");
-    printf("The arguments are: N filename nsteps delta_t graphics \n");
-  }
+	FILE *file;
 
-  N = atoi(argv[1]);
-  nsteps = atoi(argv[3]);
-  delta_t = atof(argv[4]);
-  graphics = atoi(argv[5]);
-  G= 100/(double)N;
-  double** pos = (double **)malloc(N*sizeof(double*));
-  for(i=0; i<N; i++){
-    pos[i]= (double *)malloc(2*sizeof(double));
-  }
-  double** vel = (double **)malloc(N*sizeof(double*));
-    for(i=0; i<N; i++){
-      vel[i]= (double *)malloc(2*sizeof(double));
-    }
-  //initialize and eclare with that funct in lab 3
-  double** a = (double **)malloc(N*sizeof(double*));
-    for(i=0; i<N; i++){
-      a[i]= (double *)malloc(2*sizeof(double));
-    }
-
-  double* m = (double *)malloc(N*sizeof(double));
-  double* bright = (double *)malloc(N*sizeof(double));
-
-  // Read the read_data
-  FILE *file;
-  file=fopen(filename, "rb");
-  for(i=0; i< N; i++){
-    fread(&pos[i][0], sizeof(double), 1, file);
-    fread(&pos[i][1], sizeof(double), 1, file);
-    fread(&m[i], sizeof(double), 1, file);
-    fread(&vel[i][0], sizeof(double), 1, file);
-    fread(&vel[i][1], sizeof(double), 1, file);
-    fread(&bright[i], sizeof(double), 1, file);
-  }
-
-  for (i = 0; i < N; i++) {
-    printf("%f\n", pos[i][0]);
-    printf("%f\n", pos[i][1]);
-    printf("%f\n", m[i]);
-    printf("%f\n", vel[i][0]);
-    printf("%f\n", vel[i][1]);
-    printf("%f\n", bright[i]);
-  }
-
-
-  for(step=0; step < nsteps; step++){
-    for(i=0; i < N; i++){
-      //you gotta make sure you update with the "old " vectors (make copy)
-      update_particle(N, pos, vel, m, i, delta_t, G);
-      //graphics
-    }
-  }
-  return 0;
-}
+	file = fopen(file_name , "rb");
+	/*maybe in this case we could allocate memory for this
+	matrix statically*/
+	double **arr = (double **)malloc(N*sizeof(double*));
+	double **acc_matrix_x = (double**)malloc(N*sizeof(double*));
+	double **acc_matrix_y = (double**)malloc(N*sizeof(double*));
+	for (int i = 0 ; i<N ;i++){
+		arr[i] = (double*)malloc(6 * sizeof(double));
+		acc_matrix_x[i] = (double*)malloc((i+1) * sizeof(double));
+		acc_matrix_y[i] = (double*)malloc((i+1) * sizeof(double));
+	}
 
 
 
-void update_particle(int N, double** pos, double** vel, double* m,
-  int i , double delta_t, double G){
+	for (int i = 0 ; i<(N) ; i++){
+		double x , y , vx , vy , mass , bright;
+		fread(&x , sizeof(double) , 1 ,file);
+		fread(&y , sizeof(double) , 1 ,file);
+		fread(&mass , sizeof(double) , 1 ,file);
+		fread(&vx , sizeof(double) , 1 ,file);
+		fread(&vy , sizeof(double) , 1 ,file);
+		fread(&bright, sizeof(double) , 1 ,file);
+		arr[i][0] = x;
+		arr[i][1] = y;
+		arr[i][2] = mass;
+		arr[i][3] = vx;
+		arr[i][4] = vy;
+		arr[i][5] = bright;
+	}
+	fclose(file);
 
-    //update according to symplectic Eulor method
-    double** a = (double**)malloc(sizeof(double*)*N);
-    for (i = 0; i < N; i++){
-      a[i]=(double*)malloc(sizeof(double)*N);
-    }
-    //get acceleration for all particles
-    for(i=0; i < N; i++){
-      get_a(i, m, pos, a, G, N);
-    }
-    //update pos and vel
-    for(i=0; i < N; i++){
-      vel[i][0] += delta_t*a[i][0];
-      vel[i][1] += delta_t*a[i][1];
-      pos[i][0] += delta_t*vel[i][0];
-      pos[i][1] += delta_t*vel[i][1];
-    }
-    return;
-  }
+	if(graphics){
+		//graphics shit
+		const float circleRadius=0.01, circleColor=0;
+		const int windowWidth=800;
+		//graphic constants
+		int L=1,W=1;
+		const float G = 100/(double)N;
+		const	float epsilon_0 = 0.001;
 
-void get_a(int i, double* m, double** pos, double** a, double G, int N){
-  double sumx=0, sumy=0, r;
-  int j;
+		//initialize graphics window
+		InitializeGraphics("0",windowWidth,windowWidth);
+		SetCAxes(0,1);
+		printf("Hit q to quit.\n");
+		while(!CheckForQuit()){
+			//do we need to save the position for each step?
+			for (int k = 0 ; k<n_steps ; k++){
+				int i, j;
+				ClearScreen();
+				for (i = 0; i<N ; i+=4){
+					//calculates new positions in just one step
+					for (j = 0; j<=i ; j++){
+							/* first we calculate the coordinates with respect
+							to the initial frame of reference, then
+							the denominator and finally multiply the result
+							by the mass of the particle and the distance vector.
+							*/
+							double x_direction_1 = arr[i][0] - arr[j][0];
+							double x_direction_2 = arr[i+1][0] - arr[j][0];
+							double x_direction_3 = arr[i+2][0] - arr[j][0];
+							double x_direction_4 = arr[i+3][0] - arr[j][0];
+							double y_direction_1 = arr[i][1] - arr[j][1];
+							double y_direction_2 = arr[i+1][1] - arr[j][1];
+							double y_direction_3 = arr[i+2][1] - arr[j][1];
+							double y_direction_4 = arr[i+3][1] - arr[j][1];
+							double denominator_1 = pow((sqrt((x_direction_1)*(x_direction_1) + (y_direction_1)*(y_direction_1))+epsilon_0),3);
+							acc_matrix_x[i][j] = -G*x_direction_1/denominator_1;
+							acc_matrix_y[i][j] = -G*y_direction_1/denominator_1;
+							double denominator_2 = pow((sqrt((x_direction_2)*(x_direction_2) + (y_direction_2)*(y_direction_2))+epsilon_0),3);
+							acc_matrix_x[i+1][j] = -G*x_direction_2/denominator_2;
+							acc_matrix_y[i+1][j] = -G*y_direction_2/denominator_2;
+							double denominator_3 = pow((sqrt((x_direction_3)*(x_direction_3) + (y_direction_3)*(y_direction_3))+epsilon_0),3);
+							acc_matrix_x[i+2][j] = -G*x_direction_3/denominator_3;
+							acc_matrix_y[i+2][j] = -G*y_direction_3/denominator_3;
+							double denominator_4 = pow((sqrt((x_direction_4)*(x_direction_4) + (y_direction_4)*(y_direction_4))+epsilon_0),3);
+							acc_matrix_x[i+3][j] = -G*x_direction_4/denominator_4;
+							acc_matrix_y[i+3][j] = -G*y_direction_4/denominator_4;
+							//printf("%lf \n" , acc_matrix_y[i][j]);
+					}
+					for ( i = i ; i<N ; i++){
+						double x_direction_1 = arr[i][0] - arr[j][0];
+						double y_direction_1 = arr[i][1] - arr[j][1];
+						double denominator_1 = pow((sqrt((x_direction_1)*(x_direction_1) + (y_direction_1)*(y_direction_1))+epsilon_0),3);
+						acc_matrix_x[i][j] = -G*x_direction_1/denominator_1;
+						acc_matrix_y[i][j] = -G*y_direction_1/denominator_1;
+					}
 
-  for(j=0; j<i; j++){
-    r= (pos[i][0] - pos[j][0])*(pos[i][0] - pos[j][0])
-     + (pos[i][1] - pos[j][1])*(pos[i][1] - pos[j][1]);
-    sumx += m[j]/(r*r*r)*(pos[i][0]-pos[j][0]);
-    sumy += m[j]/(r*r*r)*(pos[i][1]-pos[j][1]);
-  }
-  //in order to not have ifs in the for loop
-  for(j=i+1; j<N; j++){
-    r= (pos[i][0] - pos[j][0])*(pos[i][0] - pos[j][0])
-     + (pos[i][1] - pos[j][1])*(pos[i][1] - pos[j][1]) + eps;
-    sumx += m[j]/(r*r*r)*(pos[i][0]-pos[j][0]);
-    sumy += m[j]/(r*r*r)*(pos[i][1]-pos[j][1]);
-  }
+				}
 
-  a[i][0] = -G*sumx;
-  a[i][1] = -G*sumy;
-  return;
+				for (int i = 0 ; i < N ; i++){
+				//calculate total_acc for particle i and update positions vel
+					double total_acc_x = 0;
+				  double total_acc_y = 0;
+					for (int j = 0 ; j <= i ; j++){
+						total_acc_x = total_acc_x + arr[j][2]*acc_matrix_x[i][j];
+						total_acc_y = total_acc_y + arr[j][2]*acc_matrix_y[i][j];
+					}
+					for (int j = i+1 ; j < N ; j++){
+						total_acc_x = total_acc_x-arr[j][2]*acc_matrix_x[j][i];
+						total_acc_y = total_acc_y-arr[j][2]*acc_matrix_y[j][i];
+					}
+
+					//Draw particle i
+					DrawCircle(arr[i][0], arr[i][1], L, W, circleRadius, circleColor);
+					//Apply Euler method and update arr
+					arr[i][3] = arr[i][3] + delta_t*total_acc_x;
+					arr[i][4] = arr[i][4] + delta_t*total_acc_y;
+					arr[i][0] = arr[i][0] + delta_t*arr[i][3];
+					arr[i][1] = arr[i][1] + delta_t*arr[i][4];
+				}
+				Refresh();
+				/* Sleep a short while to avoid screen flickering. */
+				usleep(4000);
+			}
+			//OUT OF STEP LOOP
+		}
+		FlushDisplay();
+		CloseDisplay();
+	}else{
+		const float G = 100/(double)N;
+		const	float epsilon_0 = 0.001;
+
+		//do we need to save the position for each step?
+		for (int k = 0 ; k<n_steps ; k++){
+			int i, j;
+			for (i = 0; i<N ; i+=4){
+				//calculates new positions in just one step
+				for (j = 0; j<=i ; j++){
+						/* first we calculate the coordinates with respect
+						to the initial frame of reference, then
+						the denominator and finally multiply the result
+						by the mass of the particle and the distance vector.
+						*/
+						double x_direction_1 = arr[i][0] - arr[j][0];
+						double x_direction_2 = arr[i+1][0] - arr[j][0];
+						double x_direction_3 = arr[i+2][0] - arr[j][0];
+						double x_direction_4 = arr[i+3][0] - arr[j][0];
+						double y_direction_1 = arr[i][1] - arr[j][1];
+						double y_direction_2 = arr[i+1][1] - arr[j][1];
+						double y_direction_3 = arr[i+2][1] - arr[j][1];
+						double y_direction_4 = arr[i+3][1] - arr[j][1];
+						double denominator_1 = pow((sqrt((x_direction_1)*(x_direction_1) + (y_direction_1)*(y_direction_1))+epsilon_0),3);
+						acc_matrix_x[i][j] = -G*x_direction_1/denominator_1;
+						acc_matrix_y[i][j] = -G*y_direction_1/denominator_1;
+						double denominator_2 = pow((sqrt((x_direction_2)*(x_direction_2) + (y_direction_2)*(y_direction_2))+epsilon_0),3);
+						acc_matrix_x[i+1][j] = -G*x_direction_2/denominator_2;
+						acc_matrix_y[i+1][j] = -G*y_direction_2/denominator_2;
+						double denominator_3 = pow((sqrt((x_direction_3)*(x_direction_3) + (y_direction_3)*(y_direction_3))+epsilon_0),3);
+						acc_matrix_x[i+2][j] = -G*x_direction_3/denominator_3;
+						acc_matrix_y[i+2][j] = -G*y_direction_3/denominator_3;
+						double denominator_4 = pow((sqrt((x_direction_4)*(x_direction_4) + (y_direction_4)*(y_direction_4))+epsilon_0),3);
+						acc_matrix_x[i+3][j] = -G*x_direction_4/denominator_4;
+						acc_matrix_y[i+3][j] = -G*y_direction_4/denominator_4;
+						//printf("%lf \n" , acc_matrix_y[i][j]);
+				}
+				for ( i = i ; i<N ; i++){
+					double x_direction_1 = arr[i][0] - arr[j][0];
+					double y_direction_1 = arr[i][1] - arr[j][1];
+					double denominator_1 = pow((sqrt((x_direction_1)*(x_direction_1) + (y_direction_1)*(y_direction_1))+epsilon_0),3);
+					acc_matrix_x[i][j] = -G*x_direction_1/denominator_1;
+					acc_matrix_y[i][j] = -G*y_direction_1/denominator_1;
+				}
+
+			}
+
+			for (int i = 0 ; i < N ; i++){
+				double total_acc_x = 0;
+			  double total_acc_y = 0;
+				for (int j = 0 ; j <= i ; j++){
+					//printf("%lf \n" , acc_matrix_y[i][j]);
+					total_acc_x = total_acc_x + arr[j][2]*acc_matrix_x[i][j];
+					total_acc_y = total_acc_y + arr[j][2]*acc_matrix_y[i][j];
+					//printf("First loop : %d\n" , j );
+				}
+				for (int j = i+1 ; j < N ; j++){
+					total_acc_x = total_acc_x-arr[j][2]*acc_matrix_x[j][i];
+					total_acc_y = total_acc_y-arr[j][2]*acc_matrix_y[j][i];
+					//printf("Second loop : %d \n" , j);
+				}
+				//printf("N ::::___>>> %d \n" , N);
+				arr[i][3] = arr[i][3] + delta_t*total_acc_x;
+				arr[i][4] = arr[i][4] + delta_t*total_acc_y;
+				arr[i][0] = arr[i][0] + delta_t*arr[i][3];
+				arr[i][1] = arr[i][1] + delta_t*arr[i][4];
+			}
+
+		}
+	}
+	FILE *file2;
+	file2 = fopen("output.gal" , "wb");
+	for (int i = 0 ; i<(N) ; i++){
+		double x , y , vx , vy , mass , bright;
+		x = arr[i][0] ;
+		y = arr[i][1] ;
+		mass = arr[i][2];
+		vx = arr[i][3];
+		vy = arr[i][4];
+		bright = arr[i][5];
+		fwrite(&x , sizeof(double) , 1 ,file2);
+		fwrite(&y , sizeof(double) , 1,file2);
+		fwrite(&mass , sizeof(double) , 1 ,file2);
+		fwrite(&vx , sizeof(double) , 1 ,file2);
+		fwrite(&vy , sizeof(double) , 1 ,file2);
+		fwrite(&bright, sizeof(double) , 1 ,file2);
+
+	}
+
+	fclose(file2);
+
+
+
+	for (int i = 0; i<N ; i++){
+		free(arr[i]);
+		free(acc_matrix_x[i]);
+		free(acc_matrix_y[i]);
+	}
+
+	free(arr);
+	free(acc_matrix_x);
+	free(acc_matrix_y);
+
+
+	clock_t end = clock();
+	double time_spent = (double)(end - begin)/CLOCKS_PER_SEC;
+
+	FILE *file3;
+	file3 = fopen("time.txt" , "a+");
+	fprintf(file3 , "%lf \n" , time_spent );
+	fclose(file3);
+	return 0;
 }
