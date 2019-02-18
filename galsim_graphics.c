@@ -89,7 +89,7 @@ int main(int argc , char *args[]){
 				double sum_x = 0;
 				double sum_y = 0;
 				double force_x = 0;
-				double force_y = 0;
+				double force_y = 0; 
 				double acceleration_x,acceleration_y,new_velocity_x,new_velocity_y , new_position_x , new_position_y;
 				for (int j = 0; j<(N) ; j++){
 					if (j != i){
@@ -127,7 +127,7 @@ int main(int argc , char *args[]){
 				new_arr[i][2] = new_velocity_x;
 				new_arr[i][3] = new_velocity_y;
 			}
-			//we are on the step loop now
+			//we are out of i loop now
 			//start with graphic drawing for step k
 			ClearScreen();
 			for (int i = 0; i<N ; i++){
